@@ -1,0 +1,53 @@
+fetch("http://localhost:8000/api/stream", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    key1: "value1",
+    key2: "value2",
+  }),
+})
+  .then(async (response) => {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // Split buffer by newline to get each JSON string
+      let lines = buffer.split("\n");
+
+      // Keep the last line (could be incomplete)
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        if (line.trim()) {
+          try {
+            const json = JSON.parse(line);
+            console.log("Received JSON object:", json);
+            // Handle each JSON object here
+          } catch (e) {
+            console.error("Failed to parse JSON line:", line, e);
+          }
+        }
+      }
+    }
+
+    // Optionally parse the last buffered line if complete
+    if (buffer.trim()) {
+      try {
+        const json = JSON.parse(buffer);
+        console.log("Received JSON object:", json);
+      } catch (e) {
+        console.error("Failed to parse last JSON line:", buffer, e);
+      }
+    }
+  })
+  .catch((error) => {
+    console.error("Fetch error:", error);
+  });
