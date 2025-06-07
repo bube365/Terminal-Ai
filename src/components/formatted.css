@@ -1,0 +1,12 @@
+.FormattedTextComponent p {
+  margin-top: 2px !important; /* Force the style */
+}
+
+.green-link {
+  color: green;
+  text-decoration: underline;
+}
+
+.green-link:hover {
+  color: darkgreen;
+}
